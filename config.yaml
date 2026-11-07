@@ -1,0 +1,87 @@
+experiment:
+  sample_size_per_subfield: 800
+  date_range:
+    start: "2020-01-01"
+    end: present
+
+subfields:
+  multilingual_nlp:
+    macro_cluster: applied_socio_technical
+    hypothesized_female_representation: ">25%"
+    target_scope: Low-resource machine translation, dialect adaptation, cross-lingual transfer, and linguistic diversity.
+    query: '(cat:cs.CL) AND (ti:"multilingual" OR ti:"cross-lingual" OR ti:"low-resource" OR ti:"machine translation" OR abs:"dialect adaptation")'
+  multicultural_alignment:
+    macro_cluster: applied_socio_technical
+    hypothesized_female_representation: ">30%"
+    target_scope: Cultural value pluralism, demographic or geographic bias evaluation, culturally situated benchmarks, and subjective annotation.
+    query: '(cat:cs.CL OR cat:cs.CY OR cat:cs.AI) AND (ti:"multicultural" OR ti:"cultural values" OR ti:"culturally situated" OR ti:"geographic bias" OR abs:"value alignment")'
+  ai_governance_policy:
+    macro_cluster: applied_socio_technical
+    hypothesized_female_representation: ">30%"
+    target_scope: AI regulation and compliance, audits and red-teaming reports, intellectual property, copyright, and environmental impact.
+    query: '(cat:cs.CY OR cat:cs.HC OR cat:cs.AI) AND (ti:"AI governance" OR ti:"AI policy" OR ti:"audit" OR ti:"compliance" OR ti:"regulation" OR ti:"copyright" OR abs:"environmental impact of AI")'
+  healthcare_ai:
+    macro_cluster: applied_socio_technical
+    hypothesized_female_representation: ">25%"
+    target_scope: Clinical records, medical imaging and diagnosis, computational biology, and public health surveillance.
+    query: '(cat:cs.CV OR cat:cs.LG OR cat:cs.AI OR cat:q-bio.QM) AND (ti:"clinical" OR ti:"medical" OR ti:"biomedical" OR ti:"health" OR ti:"radiology" OR abs:"electronic health records")'
+  human_ai_interaction_edtech:
+    macro_cluster: applied_socio_technical
+    hypothesized_female_representation: ">35%"
+    target_scope: Human-facing trust and explainability interfaces, co-design, human-in-the-loop systems, and educational AI tools.
+    query: '(cat:cs.HC OR cat:cs.CY OR cat:cs.AI) AND (ti:"human-AI interaction" OR ti:"human-centered" OR ti:"co-design" OR ti:"trust" OR ti:"explainability interface" OR ti:"educational AI" OR abs:"human-in-the-loop")'
+  hardware_systems:
+    macro_cluster: core_infrastructure
+    hypothesized_female_representation: "<15%"
+    target_scope: Distributed training runtimes, GPU and TPU kernel optimization, model compilation, and low-bit quantization infrastructure.
+    query: '(cat:cs.DC OR cat:cs.AR OR cat:cs.LG) AND (ti:"GPU" OR ti:"TPU" OR ti:"compiler" OR ti:"distributed training" OR ti:"accelerator" OR ti:"quantization")'
+  cybersecurity_ai:
+    macro_cluster: core_infrastructure
+    hypothesized_female_representation: "<15%"
+    target_scope: AI-targeted jailbreaking, data poisoning, model extraction, backdoors, and cryptographic model verification.
+    query: '(cat:cs.CR) AND (ti:"jailbreak" OR ti:"data poisoning" OR ti:"model extraction" OR ti:"backdoor" OR ti:"adversarial attack" OR abs:"cryptographic verification of models")'
+  robotics_kinematics:
+    macro_cluster: core_infrastructure
+    hypothesized_female_representation: "<15%"
+    target_scope: Sim-to-real transfer, hardware kinematics, quadrupeds and manipulators, and reinforcement-learning control dynamics.
+    query: '(cat:cs.RO) AND (ti:"sim-to-real" OR ti:"kinematics" OR ti:"quadruped" OR ti:"manipulator" OR ti:"robot control" OR abs:"control dynamics")'
+  core_theory_statistical_optimization:
+    macro_cluster: core_infrastructure
+    hypothesized_female_representation: "<15%"
+    target_scope: Generalization bounds, non-convex optimization, loss-landscape geometry, and theoretical learning dynamics.
+    query: '(cat:cs.LG OR cat:stat.ML OR cat:cs.AI) AND (ti:"generalization bound" OR ti:"non-convex optimization" OR ti:"loss landscape" OR ti:"learning dynamics" OR abs:"statistical learning theory")'
+  pretraining_foundations_architectures:
+    macro_cluster: core_infrastructure
+    hypothesized_female_representation: "<18%"
+    target_scope: Scaling laws, attention mechanisms, state-space models, and foundations of large-scale pre-training.
+    query: '(cat:cs.LG OR cat:cs.AI OR cat:cs.CL) AND (ti:"scaling laws" OR ti:"attention mechanism" OR ti:"state-space model" OR ti:"pre-training" OR abs:"foundational pretraining")'
+  technical_safety_interp:
+    macro_cluster: methodological_bridge
+    hypothesized_female_representation: "15%-22%"
+    target_scope: Sparse autoencoders, linear probes, circuit tracing, steering vectors, representation engineering, and mathematical RLHF.
+    query: '(cat:cs.LG OR cat:cs.AI) AND (ti:"mechanistic interpretability" OR ti:"sparse autoencoder" OR ti:"linear probe" OR ti:"circuit tracing" OR ti:"steering vector" OR ti:"representation engineering" OR abs:"RLHF")'
+
+inference:
+  confidence_threshold: 0.95
+  min_sample_count: 100
+  target_pronouns:
+    female: ["she", "her", "hers"]
+    male: ["he", "him", "his"]
+    non_binary: ["they", "them", "their"]
+
+validation:
+  audit_sample_rate: 0.10
+  min_known_authors_per_subfield: 350
+
+enrichment:
+  enabled: false
+  openalex_mailto: ""
+  rate_limit_delay: 0.1
+  academic_age_brackets:
+    junior: [0, 3]
+    mid: [4, 7]
+    senior: [8, null]
+  classification_thresholds:
+    gender_min_confidence: 0.95
+    gender_min_sample_count: 100
+    require_country_validation: true

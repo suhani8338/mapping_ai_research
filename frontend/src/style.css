@@ -1,0 +1,404 @@
+@import "tabulator-tables/dist/css/tabulator.min.css";
+
+:root {
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #23313b;
+  background: #f4f6f7;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  --border: #e2e7ea;
+  --muted: #71808b;
+  --accent: #28627b;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 360px;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  min-height: 104px;
+  padding: 20px 34px;
+  color: #fff;
+  background: #183847;
+}
+
+.app-header h1 {
+  margin: 3px 0 0;
+  font-size: clamp(20px, 2.2vw, 29px);
+  font-weight: 650;
+  letter-spacing: -0.035em;
+}
+
+.eyebrow {
+  margin: 0 0 7px;
+  color: #7c919b;
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: 0.13em;
+}
+
+.app-header .eyebrow {
+  color: #9dc2cd;
+}
+
+.header-note {
+  margin: 0;
+  color: #c4d2d7;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.app-layout {
+  display: grid;
+  grid-template-columns: 276px minmax(0, 1fr);
+  min-height: calc(100vh - 104px);
+}
+
+.sidebar {
+  padding: 25px 20px 28px;
+  border-right: 1px solid var(--border);
+  background: #fff;
+}
+
+.sidebar-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 22px;
+}
+
+.sidebar h2,
+.card-heading h2 {
+  margin: 0;
+  color: #263640;
+  font-size: 18px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+
+.filter-group {
+  min-width: 0;
+  margin: 0;
+  padding: 14px 0;
+  border: 0;
+  border-top: 1px solid var(--border);
+}
+
+.filter-group legend {
+  padding: 0;
+  color: #364751;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.filter-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin-top: 10px;
+  color: #53636e;
+  font-size: 12px;
+  line-height: 1.4;
+  cursor: pointer;
+}
+
+.filter-option input {
+  width: 14px;
+  height: 14px;
+  margin: 1px 0 0;
+  accent-color: var(--accent);
+}
+
+.filter-empty {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.year-range-label {
+  display: flex;
+  justify-content: space-between;
+  margin: 10px 0;
+  color: #40515c;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.range-control {
+  display: grid;
+  grid-template-columns: 36px 1fr;
+  align-items: center;
+  gap: 8px;
+  margin-top: 9px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.range-control input {
+  width: 100%;
+  accent-color: var(--accent);
+}
+
+.ethics-note {
+  margin: 20px 0 0;
+  padding: 12px;
+  border-radius: 6px;
+  color: #596c77;
+  background: #f2f6f7;
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.button {
+  min-height: 36px;
+  padding: 8px 12px;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.button:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+.button-secondary {
+  color: #40535e;
+  border-color: #d7dfe3;
+  background: #fff;
+}
+
+.reset-button {
+  width: 100%;
+  margin-top: 18px;
+}
+
+.button-primary {
+  color: #fff;
+  background: #28627b;
+}
+
+.button-primary:hover {
+  background: #1f536a;
+}
+
+.workspace {
+  min-width: 0;
+  padding: 22px 26px 36px;
+}
+
+.workspace-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.status {
+  margin: 0;
+  color: #657681;
+  font-size: 12px;
+}
+
+.status-error {
+  color: #a53d3d;
+}
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid #e1e6e9;
+  border-radius: 7px;
+  background: #fff;
+}
+
+.tabs button {
+  padding: 8px 12px;
+  border: 0;
+  border-radius: 4px;
+  color: #667681;
+  background: transparent;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.tabs button[aria-selected="true"] {
+  color: #fff;
+  background: #28627b;
+}
+
+.chart-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 18px;
+}
+
+.chart-card {
+  min-width: 0;
+  padding: 18px 18px 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 2px 6px rgb(26 49 61 / 3%);
+}
+
+.chart-card-wide {
+  grid-column: span 2;
+}
+
+.card-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.card-heading h2 {
+  font-size: 16px;
+}
+
+.chart {
+  width: 100%;
+  min-width: 0;
+}
+
+.chart-tall {
+  height: 370px;
+  margin-top: 8px;
+}
+
+.chart-country {
+  height: 310px;
+  margin-top: 8px;
+}
+
+.card-note {
+  margin: 8px 0 2px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.paper-card {
+  padding: 22px;
+}
+
+.paper-heading {
+  margin-bottom: 10px;
+}
+
+#paper-table {
+  margin-top: 16px;
+}
+
+.tabulator {
+  border: 1px solid var(--border);
+  color: #34444e;
+  font-size: 12px;
+}
+
+.tabulator .tabulator-header {
+  border-bottom: 1px solid var(--border);
+  background: #f6f8f9;
+}
+
+.tabulator .tabulator-header .tabulator-col {
+  background: transparent;
+}
+
+.tabulator .tabulator-row .tabulator-cell {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.tabulator .tabulator-row .tabulator-cell a {
+  color: #28627b;
+  text-decoration: none;
+}
+
+.tabulator .tabulator-row .tabulator-cell a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 1050px) {
+  .app-layout {
+    grid-template-columns: 240px minmax(0, 1fr);
+  }
+
+  .workspace {
+    padding-right: 18px;
+    padding-left: 18px;
+  }
+
+  .chart-card-wide {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 720px) {
+  .app-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 9px;
+    padding: 18px 20px;
+  }
+
+  .header-note {
+    white-space: normal;
+  }
+
+  .app-layout {
+    display: block;
+  }
+
+  .sidebar {
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .workspace {
+    padding: 18px 12px 28px;
+  }
+
+  .workspace-heading {
+    align-items: flex-start;
+    flex-direction: column-reverse;
+  }
+
+  .chart-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .chart-card-wide {
+    grid-column: auto;
+  }
+
+  .chart-tall {
+    height: 350px;
+  }
+
+  .paper-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

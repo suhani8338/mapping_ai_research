@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Explore aggregate gender representation and classification coverage across AI research subfields."
+    />
+    <title>Gender &amp; Demographic Disparities in AI Research</title>
+  </head>
+  <body>
+    <header class="app-header">
+      <div>
+        <p class="eyebrow">CLIENT-SIDE RESEARCH DASHBOARD</p>
+        <h1>Gender &amp; Demographic Disparities in AI Research</h1>
+      </div>
+      <p class="header-note">Private, in-browser analysis · DuckDB-WASM + Parquet</p>
+    </header>
+
+    <main class="app-layout">
+      <aside class="sidebar" aria-label="Dashboard filters">
+        <div class="sidebar-heading">
+          <div>
+            <p class="eyebrow">EXPLORE THE DATA</p>
+            <h2>Filters</h2>
+          </div>
+        </div>
+        <div id="filter-sidebar"></div>
+        <p class="ethics-note">
+          Gender labels are uncertain research estimates, not identity claims. “Unknown”
+          remains visible in coverage summaries.
+        </p>
+      </aside>
+
+      <section class="workspace">
+        <div class="workspace-heading">
+          <p id="database-status" class="status" aria-live="polite">
+            Starting the client-side analytics engine…
+          </p>
+          <div class="tabs" role="tablist" aria-label="Dashboard views">
+            <button type="button" role="tab" data-tab="charts" aria-selected="true">
+              Visualizations
+            </button>
+            <button type="button" role="tab" data-tab="papers" aria-selected="false">
+              Paper browser
+            </button>
+          </div>
+        </div>
+
+        <section class="tab-panel" data-panel="charts" aria-label="Visualizations">
+          <div class="chart-grid">
+            <article class="chart-card chart-card-wide">
+              <div class="card-heading">
+                <div>
+                  <p class="eyebrow">SUBFIELD COMPARISON</p>
+                  <h2>Female representation among classified authors</h2>
+                </div>
+              </div>
+              <div id="subfield-chart" class="chart chart-tall" role="img"
+                aria-label="Female representation by subfield and macro-cluster"></div>
+            </article>
+            <article class="chart-card">
+              <div class="card-heading">
+                <div>
+                  <p class="eyebrow">AUTHOR ORDER</p>
+                  <h2>First-to-last author representation</h2>
+                </div>
+              </div>
+              <p class="card-note">Differences are descriptive; no significance test is available in this dataset.</p>
+              <div id="dropoff-chart" class="chart chart-tall" role="img"
+                aria-label="Female representation for first and last authors by subfield"></div>
+            </article>
+            <article class="chart-card">
+              <div class="card-heading">
+                <div>
+                  <p class="eyebrow">CLASSIFICATION COVERAGE</p>
+                  <h2>Known labels and unknowns</h2>
+                </div>
+              </div>
+              <div id="coverage-chart" class="chart chart-tall" role="img"
+                aria-label="Gender classification coverage by subfield"></div>
+            </article>
+            <article class="chart-card chart-card-wide">
+              <div class="card-heading">
+                <div>
+                  <p class="eyebrow">AFFILIATION GEOGRAPHY</p>
+                  <h2>Author volume by verified country code</h2>
+                </div>
+              </div>
+              <p class="card-note">Only validated country codes are plotted; unknown affiliations are excluded.</p>
+              <div id="country-chart" class="chart chart-country" role="img"
+                aria-label="Author counts and female representation by country"></div>
+            </article>
+          </div>
+        </section>
+
+        <section class="tab-panel" data-panel="papers" aria-label="Paper browser" hidden>
+          <article class="chart-card paper-card">
+            <div class="card-heading paper-heading">
+              <div>
+                <p class="eyebrow">FILTERED RECORDS</p>
+                <h2>Paper browser</h2>
+              </div>
+              <button id="download-csv" class="button button-primary" type="button">
+                Download filtered data (CSV)
+              </button>
+            </div>
+            <p class="card-note">
+              The grid shows one row per paper. CSV export includes matching author records and paper metadata.
+            </p>
+            <div id="paper-table"></div>
+          </article>
+        </section>
+      </section>
+    </main>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
