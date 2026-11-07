@@ -105,14 +105,26 @@ def _arrow_table(
         raise ValueError(f"Could not convert {dataset} rows to the declared schema") from error
 
 
+def _merge_rows(
+    existing_rows: list[dict[str, Any]],
+    new_rows: list[dict[str, Any]],
+    key_fields: tuple[str, ...],
+) -> list[dict[str, Any]]:
+    merged: dict[tuple[Any, ...], dict[str, Any]] = {}
+    for row in (*existing_rows, *new_rows):
+        merged[tuple(row[field] for field in key_fields)] = row
+    return list(merged.values())
+
+
 def build_parquet(
     project_root: str | Path = ".",
     *,
     authors_csv: str | Path | None = None,
     papers_csv: str | Path | None = None,
     output_dir: str | Path | None = None,
+    append: bool = False,
 ) -> tuple[Path, Path]:
-    """Build the author and paper Parquet files from pipeline CSV outputs."""
+    """Build Parquet datasets from pipeline CSVs, optionally merging an existing batch."""
     root = Path(project_root)
     author_path = Path(authors_csv) if authors_csv is not None else (
         root / "data" / "processed" / "arxiv_authors_final.csv"
@@ -123,6 +135,8 @@ def build_parquet(
     destination = Path(output_dir) if output_dir is not None else (
         root / "frontend" / "public" / "data"
     )
+    author_output = destination / "authors_enriched.parquet"
+    paper_output = destination / "papers.parquet"
 
     authors = _read_csv(
         author_path,
@@ -161,7 +175,7 @@ def build_parquet(
         paper_rows.append(
             {
                 "paper_id": paper_id,
-                "title": _clean_text(row["title"]),
+                "title": _clean_text(row["title"], "Unknown"),
                 "primary_category": _clean_text(row.get("primary_category"), "UNKNOWN"),
                 "subfield": subfield,
                 "macro_cluster": paper["macro_cluster"],
@@ -221,6 +235,24 @@ def build_parquet(
             }
         )
 
+    if append:
+        existing_outputs = (author_output.is_file(), paper_output.is_file())
+        if existing_outputs[0] != existing_outputs[1]:
+            raise ValueError(
+                "Cannot append unless both existing author and paper Parquet files are present"
+            )
+        if all(existing_outputs):
+            existing_authors = pq.read_table(author_output).to_pylist()
+            existing_papers = pq.read_table(paper_output).to_pylist()
+            author_rows = _merge_rows(
+                existing_authors,
+                author_rows,
+                ("paper_id", "subfield", "author_order", "full_name"),
+            )
+            paper_rows = _merge_rows(
+                existing_papers, paper_rows, ("paper_id", "subfield")
+            )
+
     for dataset, rows, schema in (
         ("authors", author_rows, AUTHORS_ENRICHED_SCHEMA),
         ("papers", paper_rows, PAPERS_SCHEMA),
@@ -237,8 +269,6 @@ def build_parquet(
     author_table = _arrow_table(author_rows, AUTHORS_ENRICHED_SCHEMA, dataset="authors")
     paper_table = _arrow_table(paper_rows, PAPERS_SCHEMA, dataset="papers")
     destination.mkdir(parents=True, exist_ok=True)
-    author_output = destination / "authors_enriched.parquet"
-    paper_output = destination / "papers.parquet"
     dictionary_columns = [
         "subfield",
         "macro_cluster",
@@ -293,6 +323,11 @@ def main() -> None:
     parser.add_argument("--authors-csv", type=Path)
     parser.add_argument("--papers-csv", type=Path)
     parser.add_argument("--output-dir", type=Path)
+    parser.add_argument(
+        "--append",
+        action="store_true",
+        help="Merge the CSV batch into existing Parquet files without duplicate records.",
+    )
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
     build_parquet(
@@ -300,6 +335,7 @@ def main() -> None:
         authors_csv=args.authors_csv,
         papers_csv=args.papers_csv,
         output_dir=args.output_dir,
+        append=args.append,
     )
 
 

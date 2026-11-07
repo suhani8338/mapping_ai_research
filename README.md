@@ -48,7 +48,10 @@ alongside the representation estimates.
 The static-frontend datasets can be generated from the pipeline CSVs with
 `python -m src.export.parquet_builder`. This writes Snappy-compressed
 `authors_enriched.parquet` and `papers.parquet` files to
-`frontend/public/data/`. The builder validates gender labels and reports the
+`frontend/public/data/` using typed Arrow schemas and dictionary-encoded
+subfield and country columns. Pass `--append` to merge a new batch with both
+existing files; overlapping papers and author records are replaced by the
+incoming rows. The builder validates gender labels and reports the
 unknown-label rate for each subfield; it fails if
 `authors_enriched.parquet` is not below 15,000,000 bytes. Without verified
 OpenAlex enrichment, country, academic age, and career cohort remain
@@ -82,8 +85,10 @@ Run the frontend from its directory with `npm install`, `npm run dev`, or
 `npm run build`. Filters use empty arrays to mean “all values”; `yearRange` is
 an inclusive pair of integer publication years.
 
-The GitHub Pages workflow runs the Python test suite, regenerates and size-checks
-the Parquet datasets, builds the frontend, and deploys after each push to `main`.
+The GitHub Pages workflow runs on pushes to `main` and monthly at
+`0 0 1 * *`. It tests the Python pipeline, processes the previous 30 days of
+arXiv records, appends the batch to the Parquet datasets, persists those files
+to `main`, builds the frontend, and deploys to GitHub Pages.
 
 ## How data is collected
 

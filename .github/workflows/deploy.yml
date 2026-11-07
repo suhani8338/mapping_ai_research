@@ -1,12 +1,16 @@
 name: Deploy Static Dashboard to GitHub Pages
 
 on:
+  schedule:
+    - cron: '0 0 1 * *'
   push:
     branches: [main]
+    paths-ignore:
+      - frontend/public/data/**
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -20,6 +24,7 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
+    timeout-minutes: 90
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -38,8 +43,41 @@ jobs:
       - name: Run Python Tests
         run: python -m pytest -q
 
-      - name: Generate Parquet Datasets
-        run: python -m src.export.parquet_builder
+      - name: Configure Monthly arXiv Window
+        run: |
+          python - <<'PY'
+          from datetime import date, timedelta
+          from pathlib import Path
+          import yaml
+
+          config_path = Path("config.yaml")
+          config = yaml.safe_load(config_path.read_text(encoding="utf-8"))
+          end_date = date.today()
+          config["experiment"]["date_range"]["start"] = (
+              end_date - timedelta(days=30)
+          ).isoformat()
+          config["experiment"]["date_range"]["end"] = end_date.isoformat()
+          Path(".monthly-config.yaml").write_text(
+              yaml.safe_dump(config, sort_keys=False), encoding="utf-8"
+          )
+          PY
+
+      - name: Ingest and Process Monthly arXiv Batch
+        run: python main.py --config .monthly-config.yaml --no-plots
+
+      - name: Append Monthly Parquet Batch
+        run: python -m src.export.parquet_builder --append
+
+      - name: Persist Updated Parquet Datasets
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add frontend/public/data/authors_enriched.parquet frontend/public/data/papers.parquet
+          if ! git diff --cached --quiet; then
+            git commit -m "Update monthly arXiv Parquet datasets" \
+              -m "Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          fi
 
       - name: Set up Node.js
         uses: actions/setup-node@v4

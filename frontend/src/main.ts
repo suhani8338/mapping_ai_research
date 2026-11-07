@@ -20,7 +20,7 @@ const charts = new Charts();
 const table = new DataTable("#paper-table", async () => {
   if (!filters) return;
   const csv = await exportFilteredDataCSV(filters);
-  const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+  const url = URL.createObjectURL(csv);
   const link = document.createElement("a");
   link.href = url;
   link.download = "gendered-ai-research-filtered.csv";

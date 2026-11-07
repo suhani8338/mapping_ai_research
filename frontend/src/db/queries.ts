@@ -69,6 +69,7 @@ const AUTHORS_TABLE = "authors_enriched";
 const PAPERS_TABLE = "papers";
 const AUTHOR_SUMMARY_TABLE = "author_summary";
 const AUTHOR_CHART_SUMMARY_TABLE = "author_chart_summary";
+const MIN_PUBLICATION_YEAR = 2020;
 
 function sqlString(value: string): string {
   return `'${value.replaceAll("'", "''")}'`;
@@ -99,9 +100,12 @@ function buildAuthorWhereClause(
   if (
     !Number.isSafeInteger(minimumYear) ||
     !Number.isSafeInteger(maximumYear) ||
+    minimumYear < MIN_PUBLICATION_YEAR ||
     minimumYear > maximumYear
   ) {
-    throw new RangeError("yearRange must contain ordered safe integer years");
+    throw new RangeError(
+      `yearRange must contain ordered safe integer years from ${MIN_PUBLICATION_YEAR} onward`,
+    );
   }
 
   clauses.push(
@@ -172,7 +176,15 @@ export async function queryFilterOptions(): Promise<FilterOptions> {
     SELECT MIN(publication_year) AS minimum_year,
            MAX(publication_year) AS maximum_year
     FROM ${AUTHOR_SUMMARY_TABLE}
+    WHERE publication_year >= ${MIN_PUBLICATION_YEAR}
   `);
+  const minimumYear = nullableNumericValue(years, "minimum_year", 0);
+  const maximumYear = nullableNumericValue(years, "maximum_year", 0);
+  if (minimumYear === null || maximumYear === null) {
+    throw new Error(
+      `No author records are available from ${MIN_PUBLICATION_YEAR} onward`,
+    );
+  }
   const [macroClusters, subfields, countries, academicCohorts, genders] =
     await Promise.all([
       distinctValues("macro_cluster"),
@@ -188,10 +200,7 @@ export async function queryFilterOptions(): Promise<FilterOptions> {
     countries,
     academicCohorts,
     genders,
-    yearRange: [
-      numericValue(years, "minimum_year", 0),
-      numericValue(years, "maximum_year", 0),
-    ],
+    yearRange: [Math.max(MIN_PUBLICATION_YEAR, minimumYear), maximumYear],
   };
 }
 
@@ -372,7 +381,7 @@ function csvCell(value: unknown): string {
 
 export async function exportFilteredDataCSV(
   filters: FilterState,
-): Promise<string> {
+): Promise<Blob> {
   const whereClause = buildAuthorWhereClause(filters, "authors");
   const connection = await getDatabaseConnection();
   const result = await connection.query(`
@@ -397,5 +406,6 @@ export async function exportFilteredDataCSV(
       .map((field) => csvCell(tableValue(result, field.name, rowIndex)))
       .join(","),
   );
-  return [headers.map(csvCell).join(","), ...rows].join("\r\n");
+  const csv = [headers.map(csvCell).join(","), ...rows].join("\r\n");
+  return new Blob([csv], { type: "text/csv;charset=utf-8" });
 }

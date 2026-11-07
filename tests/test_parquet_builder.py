@@ -17,7 +17,7 @@ def _write_inputs(tmp_path, *, gender="unknown", country="IN"):
     )
     papers_path.write_text(
         "paper_id,subfield,macro_cluster,published,title,authors\n"
-        '0012.34000,nlp,applied_socio_technical,2025-03-04T12:00:00Z,Paper title,'
+        '0012.34000,nlp,applied_socio_technical,2025-03-04T12:00:00Z,,'
         '"Ada Lovelace"\n',
         encoding="utf-8",
     )
@@ -38,15 +38,44 @@ def test_build_parquet_normalizes_and_preserves_output_schema(tmp_path, capsys):
     paper = paper_table.to_pylist()[0]
     assert author_table.schema.field("publication_year").type == "int32"
     assert author_table.schema.field("academic_age").type == "int16"
+    assert str(author_table.schema.field("subfield").type).startswith("dictionary")
+    assert str(author_table.schema.field("country_code").type).startswith("dictionary")
+    assert str(paper_table.schema.field("subfield").type).startswith("dictionary")
     assert author["paper_id"] == "0012.34000"
     assert author["gender"] == "unknown"
     assert author["country_code"] == "UNKNOWN"
     assert author["publication_year"] == 2025
+    assert paper["title"] == "Unknown"
     assert paper["primary_category"] == "UNKNOWN"
     assert paper["publication_date"] == "2025-03-04"
     assert paper["arxiv_url"] == "https://arxiv.org/abs/0012.34000"
     assert paper["total_authors"] == 1
+    assert pq.ParquetFile(author_path).metadata.row_group(0).column(0).compression == "SNAPPY"
     assert "nlp: 100.0%" in capsys.readouterr().out
+
+
+def test_build_parquet_appends_new_rows_and_replaces_overlapping_records(tmp_path):
+    authors, papers = _write_inputs(tmp_path)
+    output = tmp_path / "out"
+    build_parquet(tmp_path, authors_csv=authors, papers_csv=papers, output_dir=output)
+
+    with authors.open("a", encoding="utf-8") as file:
+        file.write(
+            "0012.34001,nlp,applied_socio_technical,sole,Grace Hopper,female,"
+            "0.95,US,5,senior\n"
+        )
+    with papers.open("a", encoding="utf-8") as file:
+        file.write(
+            '0012.34001,nlp,applied_socio_technical,2025-03-05T12:00:00Z,New paper,'
+            '"Grace Hopper"\n'
+        )
+
+    author_path, paper_path = build_parquet(
+        tmp_path, authors_csv=authors, papers_csv=papers, output_dir=output, append=True
+    )
+
+    assert len(pq.read_table(author_path).to_pylist()) == 2
+    assert len(pq.read_table(paper_path).to_pylist()) == 2
 
 
 def test_build_parquet_rejects_gender_outside_allowed_labels(tmp_path):
